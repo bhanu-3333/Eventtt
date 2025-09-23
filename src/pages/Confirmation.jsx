@@ -1,29 +1,22 @@
-import React from 'react';
-import { useParams, Link } from 'react-router-dom';
-import TicketCard from '../components/TicketCard';
+import React from "react";
+import QRCode from "react-qr-code";
+import { useNavigate } from "react-router-dom";
 
-export default function Confirmation(){
-  const { bookingId } = useParams();
-  const all = JSON.parse(localStorage.getItem('movieBookings') || '[]');
-  const booking = all.find(b => b.id === bookingId);
-
-  if (!booking) {
-    return (
-      <div className="container" style={{ padding:30 }}>
-        <h2>Booking not found</h2>
-        <p>Looks like the booking ID is invalid. <Link to="/">Back to home</Link></p>
-      </div>
-    );
-  }
-
+export default function Confirmation({ bookingData }) {
+  const navigate = useNavigate();
   return (
-    <div className="container" style={{ padding:20 }}>
-      <h2 style={{ textAlign:'center' }}>Booking Confirmed 🎉</h2>
-      <p style={{ textAlign:'center', color:'#475569' }}>Show your QR at the counter</p>
-      <TicketCard booking={booking} />
-      <div style={{ textAlign:'center', marginTop:10 }}>
-        <Link to="/" className="book-btn" style={{ textDecoration:'none', padding:'10px 14px' }}>Back to Home</Link>
+    <div style={{ textAlign:'center', marginTop:40 }}>
+      <h2>Booking Confirmed!</h2>
+      <div style={{ display:'inline-block', padding:20, border:'1px solid #ccc', borderRadius:12, background:'#fff' }}>
+        <h3>{bookingData.movie}</h3>
+        <p>{bookingData.theatre} • {bookingData.showtime}</p>
+        <p>Seats: {bookingData.seats.join(", ")}</p>
+        <p>Snacks: {bookingData.snacks.map(s => s.name).join(", ") || "None"}</p>
+        <h3>Total: ₹{bookingData.total}</h3>
+        <QRCode value={JSON.stringify(bookingData)} size={150} />
       </div>
+      <br/>
+      <button style={{ marginTop:20 }} onClick={() => navigate("/")}>Back to Home</button>
     </div>
   );
 }
