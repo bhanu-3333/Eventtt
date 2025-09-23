@@ -1,0 +1,20 @@
+.container{
+  max-width:1100px;
+  margin: 18px auto;
+  padding: 12px;
+}
+.hero{
+  background: linear-gradient(90deg, rgba(2,12,31,0.03), rgba(255,255,255,0.02));
+  border-radius:12px;
+  padding:20px;
+  margin-bottom:18px;
+  text-align:center;
+}
+.hero h1{ color:#022c64; margin:0; font-size:2rem }
+.hero p{ color:#475569; margin:6px 0 0 }
+.movies-grid{
+  display:flex;
+  flex-wrap:wrap;
+  justify-content:center;
+  gap:10px;
+}
