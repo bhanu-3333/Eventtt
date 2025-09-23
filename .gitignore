@@ -6,6 +6,7 @@
 *.bin
 *.pb
 *.txt
+node_modules/
 
 # Ignore whole directories
 .gradle/
