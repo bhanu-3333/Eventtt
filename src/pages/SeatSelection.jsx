@@ -1,84 +1,57 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import SeatGrid from '../components/SeatGrid';
+import React, { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
+import "../styles/SeatGrid.css";
 
-const generateSeatsForShow = (rows = 6, cols = 8, bookedRatio = 0.15) => {
-  const seatRows = [];
-  let idCounter = 1;
-  for (let r = 0; r < rows; r++) {
-    const row = [];
-    for (let c = 1; c <= cols; c++) {
-      const label = `${String.fromCharCode(65 + r)}${c}`;
-      const isBooked = Math.random() < bookedRatio;
-      row.push({ id: idCounter++, label, status: isBooked ? 'booked' : 'available' });
-    }
-    seatRows.push(row);
-  }
-  return { rows: seatRows };
-};
-
-export default function SeatSelection(){
-  const { id, showtime } = useParams();
+export default function SeatSelection({ bookingData, setBookingData }) {
   const navigate = useNavigate();
-  const decodedTime = decodeURIComponent(showtime);
-  // generate seat map once per movie+showtime
-  const initial = useMemo(() => generateSeatsForShow(6, 8, 0.18), [id, decodedTime]);
+  const location = useLocation();
+  const movie = location.state?.movie;
 
-  const [seats, setSeats] = useState(initial);
-  const [selected, setSelected] = useState([]);
+  const rows = 5;
+  const cols = 8;
+  const [seats, setSeats] = useState([]);
 
   useEffect(() => {
-    // reset on id/showtime change
-    setSeats(initial);
-    setSelected([]);
-  }, [initial, id, decodedTime]);
-
-  const toggleSeat = (seatId) => {
-    const newRows = seats.rows.map(row =>
-      row.map(s => s.id === seatId ? ({ ...s, status: s.status === 'selected' ? 'available' : 'selected' }) : s)
-    );
-    setSeats({ rows: newRows });
-
-    // update selected ids and labels
-    const flat = newRows.flat();
-    const selectedNow = flat.filter(s => s.status === 'selected').map(s => s.label);
-    setSelected(selectedNow);
-  };
-
-  const proceed = () => {
-    if (selected.length === 0) {
-      alert('Select at least one seat.');
-      return;
+    const initialSeats = [];
+    for (let r = 0; r < rows; r++) {
+      const row = [];
+      for (let c = 0; c < cols; c++) {
+        row.push({ id: `${r}-${c}`, booked: false });
+      }
+      initialSeats.push(row);
     }
-    // store booking interim info
-    const bookingTemp = {
-      movieId: id,
-      showtime: decodedTime,
-      seats: selected
-    };
-    localStorage.setItem('movieBookingTemp', JSON.stringify(bookingTemp));
-    navigate(`/summary/${id}/${encodeURIComponent(decodedTime)}`);
+    setSeats(initialSeats);
+  }, []);
+
+  const toggleSeat = (r, c) => {
+    const newSeats = seats.map(row => row.map(seat => ({ ...seat })));
+    if (!newSeats[r][c].booked) {
+      newSeats[r][c].booked = !newSeats[r][c].booked;
+      setSeats(newSeats);
+
+      const selectedSeats = [];
+      newSeats.forEach(row => row.forEach(seat => seat.booked && selectedSeats.push(seat.id)));
+      setBookingData({ ...bookingData, seats: selectedSeats, movie: movie.title, theatre: movie.theatre, showtime: movie.showtime, total: selectedSeats.length * movie.price });
+    }
   };
 
   return (
-    <div className="container" style={{ paddingBottom:40 }}>
-      <div style={{ maxWidth:900, margin:'12px auto', textAlign:'center' }}>
-        <h2>Pick Your Seats — {decodedTime}</h2>
-        <div className="screen">SCREEN</div>
-        <SeatGrid seats={seats} toggleSeat={toggleSeat} />
-        <div style={{ marginTop: 12 }}>
-          <div className="legend">
-            <div className="item"><div className="box avail"></div> Available</div>
-            <div className="item"><div className="box sel"></div> Selected</div>
-            <div className="item"><div className="box book"></div> Booked</div>
+    <div className="seat-selection">
+      <h2>Select Your Seats - {movie?.title}</h2>
+      <div className="seat-grid">
+        {seats.map((row, rIndex) =>
+          <div key={rIndex} className="seat-row">
+            {row.map((seat, cIndex) =>
+              <div
+                key={seat.id}
+                className={`seat ${seat.booked ? 'selected' : ''}`}
+                onClick={() => toggleSeat(rIndex, cIndex)}
+              />
+            )}
           </div>
-        </div>
-
-        <p style={{ marginTop:14, fontWeight:700 }}>Selected: {selected.join(', ') || 'None'}</p>
-        <div style={{ marginTop:12 }}>
-          <button onClick={proceed} className="primary">Continue to Summary</button>
-        </div>
+        )}
       </div>
+      <button className="next-btn" onClick={() => navigate("/snacks")}>Next: Snacks</button>
     </div>
   );
 }
