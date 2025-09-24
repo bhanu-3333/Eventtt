@@ -2,15 +2,17 @@ import React, { useEffect, useState } from "react";
 import MovieCard from "../components/MovieCard";
 import { Swiper, SwiperSlide } from "swiper/react";
 import SwiperCore, { Autoplay, Pagination } from "swiper";
+import { useNavigate } from "react-router-dom";
 
 import "swiper/css";
 import "swiper/css/pagination";
 
 SwiperCore.use([Autoplay, Pagination]);
 
-export default function HomePage() {
+export default function HomePage({ setBookingData }) {
   const [movies, setMovies] = useState([]);
   const [search, setSearch] = useState("");
+  const navigate = useNavigate(); // for navigation
 
   const API_KEY ="273ace99747d2e6de9128068acf00f79";
 
@@ -33,6 +35,20 @@ export default function HomePage() {
     )
       .then((res) => res.json())
       .then((data) => setMovies(data.results || []));
+  };
+
+  // Handle Book Now button
+  const handleBookNow = (movie) => {
+    setBookingData({
+      movie,
+      theatre: "Cinema Hall 1",   // default theatre
+      showtime: "10:00 AM",      // default showtime
+      seats: [],
+      snacks: [],
+      total: 0,
+      id: Date.now(),
+    });
+    navigate("/seats"); // navigate to seat selection page
   };
 
   return (
@@ -78,7 +94,10 @@ export default function HomePage() {
       >
         {movies.map((movie) => (
           <SwiperSlide key={movie.id}>
-            <MovieCard movie={movie} />
+            <MovieCard 
+              movie={movie} 
+              onBookNow={() => handleBookNow(movie)} // pass the handler
+            />
           </SwiperSlide>
         ))}
       </Swiper>

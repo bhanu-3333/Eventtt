@@ -1,22 +1,39 @@
 import React from "react";
-import QRCode from "react-qr-code";
 import { useNavigate } from "react-router-dom";
+import { QRCodeCanvas } from "qrcode.react";
 
 export default function Confirmation({ bookingData }) {
   const navigate = useNavigate();
+
+  if (!bookingData.movie) return <h2>No booking data available</h2>;
+
   return (
-    <div style={{ textAlign:'center', marginTop:40 }}>
+    <div style={{ padding: "20px" }}>
       <h2>Booking Confirmed!</h2>
-      <div style={{ display:'inline-block', padding:20, border:'1px solid #ccc', borderRadius:12, background:'#fff' }}>
-        <h3>{bookingData.movie}</h3>
-        <p>{bookingData.theatre} • {bookingData.showtime}</p>
-        <p>Seats: {bookingData.seats.join(", ")}</p>
-        <p>Snacks: {bookingData.snacks.map(s => s.name).join(", ") || "None"}</p>
-        <h3>Total: ₹{bookingData.total}</h3>
-        <QRCode value={JSON.stringify(bookingData)} size={150} />
+      <p><b>Movie:</b> {bookingData.movie.title}</p>
+      <p><b>Theatre:</b> {bookingData.theatre}</p>
+      <p><b>Showtime:</b> {bookingData.showtime}</p>
+      <p><b>Seats:</b> {bookingData.seats.join(", ")}</p>
+      <p><b>Snacks:</b> {bookingData.snacks.map(s => s.name).join(", ") || "None"}</p>
+      <p><b>Total Paid:</b> ₹{bookingData.total}</p>
+
+      <div style={{ margin: "20px 0" }}>
+        <QRCodeCanvas value={`TicketID:${bookingData.id}`} size={128} />
       </div>
-      <br/>
-      <button style={{ marginTop:20 }} onClick={() => navigate("/")}>Back to Home</button>
+
+      <button 
+        onClick={() => navigate("/tickets")}
+        style={{
+          padding: "10px 15px",
+          backgroundColor: "#1976d2",
+          color: "#fff",
+          border: "none",
+          borderRadius: "5px",
+          cursor: "pointer"
+        }}
+      >
+        Go to My Tickets
+      </button>
     </div>
   );
 }
