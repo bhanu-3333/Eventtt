@@ -1,57 +1,53 @@
-import React, { useState, useEffect } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
-import "../styles/SeatGrid.css";
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 export default function SeatSelection({ bookingData, setBookingData }) {
   const navigate = useNavigate();
-  const location = useLocation();
-  const movie = location.state?.movie;
+  const [selectedSeats, setSelectedSeats] = useState([]);
 
-  const rows = 5;
-  const cols = 8;
-  const [seats, setSeats] = useState([]);
+  const seats = Array.from({ length: 30 }, (_, i) => i + 1); // 30 seats
 
-  useEffect(() => {
-    const initialSeats = [];
-    for (let r = 0; r < rows; r++) {
-      const row = [];
-      for (let c = 0; c < cols; c++) {
-        row.push({ id: `${r}-${c}`, booked: false });
-      }
-      initialSeats.push(row);
-    }
-    setSeats(initialSeats);
-  }, []);
+  const toggleSeat = (seat) => {
+    setSelectedSeats(prev =>
+      prev.includes(seat) ? prev.filter(s => s !== seat) : [...prev, seat]
+    );
+  };
 
-  const toggleSeat = (r, c) => {
-    const newSeats = seats.map(row => row.map(seat => ({ ...seat })));
-    if (!newSeats[r][c].booked) {
-      newSeats[r][c].booked = !newSeats[r][c].booked;
-      setSeats(newSeats);
-
-      const selectedSeats = [];
-      newSeats.forEach(row => row.forEach(seat => seat.booked && selectedSeats.push(seat.id)));
-      setBookingData({ ...bookingData, seats: selectedSeats, movie: movie.title, theatre: movie.theatre, showtime: movie.showtime, total: selectedSeats.length * movie.price });
-    }
+  const handleNext = () => {
+    if (!selectedSeats.length) return alert("Select at least 1 seat");
+    setBookingData(prev => ({
+      ...prev,
+      seats: selectedSeats,
+      total: prev.total + selectedSeats.length * 50, // 50 per seat
+    }));
+    navigate("/snacks");
   };
 
   return (
-    <div className="seat-selection">
-      <h2>Select Your Seats - {movie?.title}</h2>
-      <div className="seat-grid">
-        {seats.map((row, rIndex) =>
-          <div key={rIndex} className="seat-row">
-            {row.map((seat, cIndex) =>
-              <div
-                key={seat.id}
-                className={`seat ${seat.booked ? 'selected' : ''}`}
-                onClick={() => toggleSeat(rIndex, cIndex)}
-              />
-            )}
+    <div style={{ padding: "20px" }}>
+      <h2>Select Seats for {bookingData.movie?.title}</h2>
+      <div style={{ display: "flex", flexWrap: "wrap", maxWidth: "400px" }}>
+        {seats.map(seat => (
+          <div
+            key={seat}
+            onClick={() => toggleSeat(seat)}
+            style={{
+              width: "40px",
+              height: "40px",
+              margin: "5px",
+              lineHeight: "40px",
+              textAlign: "center",
+              borderRadius: "6px",
+              cursor: "pointer",
+              backgroundColor: selectedSeats.includes(seat) ? "#1976d2" : "#eee",
+              color: selectedSeats.includes(seat) ? "#fff" : "#000"
+            }}
+          >
+            {seat}
           </div>
-        )}
+        ))}
       </div>
-      <button className="next-btn" onClick={() => navigate("/snacks")}>Next: Snacks</button>
+      <button onClick={handleNext} style={{ marginTop: "20px" }}>Next</button>
     </div>
   );
 }
