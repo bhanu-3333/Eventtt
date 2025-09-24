@@ -1,48 +1,45 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import SnackCard from "../components/SnackCard";
 
-const snackMenu = [
+const snackOptions = [
   { id: 1, name: "Popcorn", price: 50 },
-  { id: 2, name: "Soda", price: 30 },
-  { id: 3, name: "Nachos", price: 70 },
-  { id: 4, name: "Combo", price: 120 },
+  { id: 2, name: "Coke", price: 30 },
+  { id: 3, name: "Nachos", price: 60 }
 ];
 
 export default function SnackSelection({ bookingData, setBookingData }) {
-  const navigate = useNavigate();
   const [selectedSnacks, setSelectedSnacks] = useState([]);
+  const navigate = useNavigate();
 
   const toggleSnack = (snack) => {
-    const exists = selectedSnacks.find(s => s.id === snack.id);
-    let newSelection = [];
-    if (exists) {
-      newSelection = selectedSnacks.filter(s => s.id !== snack.id);
-    } else {
-      newSelection = [...selectedSnacks, snack];
-    }
-    setSelectedSnacks(newSelection);
+    setSelectedSnacks(prev =>
+      prev.includes(snack) ? prev.filter(s => s !== snack) : [...prev, snack]
+    );
+  };
 
-    const snacksTotal = newSelection.reduce((acc, s) => acc + s.price, 0);
-    const seatsTotal = bookingData.seats.length * (bookingData.total / bookingData.seats.length || 0);
-
-    setBookingData({ ...bookingData, snacks: newSelection, total: seatsTotal + snacksTotal });
+  const handleNext = () => {
+    setBookingData(prev => ({
+      ...prev,
+      snacks: selectedSnacks,
+      total: prev.total + selectedSnacks.reduce((sum, s) => sum + s.price, 0)
+    }));
+    navigate("/summary");
   };
 
   return (
-    <div className="snack-selection">
+    <div style={{ padding: "20px" }}>
       <h2>Select Snacks</h2>
-      <div className="snack-grid">
-        {snackMenu.map(snack => (
-          <SnackCard
-            key={snack.id}
-            snack={snack}
-            isSelected={selectedSnacks.includes(snack)}
-            toggleSnack={toggleSnack}
+      {snackOptions.map(snack => (
+        <div key={snack.id} style={{ margin: "10px 0" }}>
+          <input
+            type="checkbox"
+            checked={selectedSnacks.includes(snack)}
+            onChange={() => toggleSnack(snack)}
           />
-        ))}
-      </div>
-      <button className="next-btn" onClick={() => navigate("/summary")}>Next: Summary</button>
+          {snack.name} - ₹{snack.price}
+        </div>
+      ))}
+      <button onClick={handleNext} style={{ marginTop: "20px" }}>Next</button>
     </div>
   );
 }
