@@ -1,58 +1,84 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import MovieCard from "../components/MovieCard";
-import SwiperCore, { Autoplay, Pagination } from "swiper";
 import { Swiper, SwiperSlide } from "swiper/react";
+import SwiperCore, { Autoplay, Pagination } from "swiper";
+
 import "swiper/css";
 import "swiper/css/pagination";
 
 SwiperCore.use([Autoplay, Pagination]);
 
-
-const newReleases = [
-  { id: 1, title: "Avengers: Endgame", poster: "/poster1.jpg", theatre: "IMAX Theatre", showtime: "7:30 PM", price: 150, rating: 4.7 },
-  { id: 2, title: "Spider-Man: No Way Home", poster: "/poster2.jpg", theatre: "PVR Cinemas", showtime: "6:00 PM", price: 120, rating: 4.5 },
-  { id: 3, title: "The Batman", poster: "/poster3.jpg", theatre: "Cinepolis", showtime: "8:00 PM", price: 130, rating: 4.6 },
-  { id: 4, title: "Guardians of the Galaxy 3", poster: "/poster4.jpg", theatre: "INOX", showtime: "9:00 PM", price: 140, rating: 4.4 },
-  { id: 5, title: "Black Panther 2", poster: "/poster5.jpg", theatre: "PVR Cinemas", showtime: "7:00 PM", price: 150, rating: 4.8 },
-];
-
-const trendingMovies = [
-  { id: 6, title: "Doctor Strange 2", poster: "/poster6.jpg", theatre: "Cinepolis", showtime: "6:30 PM", price: 135, rating: 4.5 },
-  { id: 7, title: "Thor: Love & Thunder", poster: "/poster7.jpg", theatre: "PVR Cinemas", showtime: "7:30 PM", price: 140, rating: 4.3 },
-  { id: 8, title: "Shang-Chi", poster: "/poster8.jpg", theatre: "INOX", showtime: "8:00 PM", price: 125, rating: 4.6 },
-];
-
 export default function HomePage() {
-  return (
-    <div style={{ padding: "20px" }}>
-      <h2>New Releases</h2>
-      <Swiper
-        modules={[Autoplay, Pagination]}
-        spaceBetween={20}
-        slidesPerView={3}
-        autoplay={{ delay: 2500, disableOnInteraction: false }}
-        loop={true}
-        pagination={{ clickable: true }}
-      >
-        {newReleases.map((movie) => (
-          <SwiperSlide key={movie.id}>
-            <MovieCard movie={movie} badge="New" />
-          </SwiperSlide>
-        ))}
-      </Swiper>
+  const [movies, setMovies] = useState([]);
+  const [search, setSearch] = useState("");
 
-      <h2 style={{ marginTop: "40px" }}>Trending Movies</h2>
+  const API_KEY ="273ace99747d2e6de9128068acf00f79";
+
+  // Fetch Now Playing movies initially
+  useEffect(() => {
+    fetch(
+      `https://api.themoviedb.org/3/movie/now_playing?api_key=${API_KEY}&language=en-US&page=1`
+    )
+      .then((res) => res.json())
+      .then((data) => setMovies(data.results || []));
+  }, []);
+
+  // Search movies when typing
+  const handleSearch = (e) => {
+    e.preventDefault();
+    if (!search.trim()) return;
+
+    fetch(
+      `https://api.themoviedb.org/3/search/movie?api_key=${API_KEY}&query=${search}`
+    )
+      .then((res) => res.json())
+      .then((data) => setMovies(data.results || []));
+  };
+
+  return (
+    <div className="home-container" style={{ padding: "20px" }}>
+      <h1>🎬 Now Showing</h1>
+
+      {/* Search Bar */}
+      <form onSubmit={handleSearch} style={{ marginBottom: "20px" }}>
+        <input
+          type="text"
+          placeholder="Search movies..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          style={{
+            padding: "10px",
+            width: "300px",
+            fontSize: "16px",
+            marginRight: "10px",
+          }}
+        />
+        <button
+          type="submit"
+          style={{
+            padding: "10px 15px",
+            backgroundColor: "#1976d2",
+            color: "#fff",
+            border: "none",
+            borderRadius: "5px",
+            cursor: "pointer",
+          }}
+        >
+          Search
+        </button>
+      </form>
+
+      {/* Auto-slide movies */}
       <Swiper
-        modules={[Autoplay, Pagination]}
+        slidesPerView={4}
         spaceBetween={20}
-        slidesPerView={3}
-        autoplay={{ delay: 3000, disableOnInteraction: false }}
-        loop={true}
+        autoplay={{ delay: 2500, disableOnInteraction: false }}
         pagination={{ clickable: true }}
+        loop={true}
       >
-        {trendingMovies.map((movie) => (
+        {movies.map((movie) => (
           <SwiperSlide key={movie.id}>
-            <MovieCard movie={movie} badge="Trending" />
+            <MovieCard movie={movie} />
           </SwiperSlide>
         ))}
       </Swiper>
