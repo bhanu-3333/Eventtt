@@ -4,9 +4,7 @@ import { QRCodeCanvas } from "qrcode.react";
 
 export default function Confirmation({ bookingData }) {
   const navigate = useNavigate();
-
   if (!bookingData.movie) return <h2>No booking data available</h2>;
-
   return (
     <div style={{ padding: "20px" }}>
       <h2>Booking Confirmed!</h2>
