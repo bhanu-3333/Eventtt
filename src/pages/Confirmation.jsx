@@ -14,7 +14,6 @@ export default function Confirmation({ bookingData }) {
       <p><b>Seats:</b> {bookingData.seats.join(", ")}</p>
       <p><b>Snacks:</b> {bookingData.snacks.map(s => s.name).join(", ") || "None"}</p>
       <p><b>Total Paid:</b> ₹{bookingData.total}</p>
-
       <div style={{ margin: "20px 0" }}>
         <QRCodeCanvas value={`TicketID:${bookingData.id}`} size={128} />
       </div>
