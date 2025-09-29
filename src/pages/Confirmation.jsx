@@ -1,7 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { QRCodeCanvas } from "qrcode.react";
-
 export default function Confirmation({ bookingData }) {
   const navigate = useNavigate();
   if (!bookingData.movie) return <h2>No booking data available</h2>;
@@ -17,7 +16,6 @@ export default function Confirmation({ bookingData }) {
       <div style={{ margin: "20px 0" }}>
         <QRCodeCanvas value={`TicketID:${bookingData.id}`} size={128} />
       </div>
-
       <button 
         onClick={() => navigate("/tickets")}
         style={{
