@@ -18,6 +18,8 @@ export default function MovieCard({ movie, setBookingData }) {
     navigate("/seats");
   };
 
+
+  
   return (
     <div className="movie-card">
       <img
