@@ -29,7 +29,6 @@ export default function HomePage({ setBookingData }) {
   const handleSearch = (e) => {
     e.preventDefault();
     if (!search.trim()) return;
-
     fetch(
       `https://api.themoviedb.org/3/search/movie?api_key=${API_KEY}&query=${search}`
     )
