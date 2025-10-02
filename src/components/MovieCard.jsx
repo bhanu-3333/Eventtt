@@ -4,7 +4,6 @@ import "../styles/MovieCard.css";
 
 export default function MovieCard({ movie, setBookingData }) {
   const navigate = useNavigate();
-
   const handleBookNow = () => {
     setBookingData({
       movie,
